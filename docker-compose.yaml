@@ -1,14 +1,14 @@
 services:
-  cropwise-backend:
+  cropwise-api-backend:
     build:
-      context: ./backend
+      context: ./api_backend
       dockerfile: Dockerfile
-    container_name: cropwise-backend
+    container_name: cropwise-api-backend
     ports:
       - "8000:8000"
     environment:
       - PYTHONPATH=/app
       - ENVIRONMENT=development
     volumes:
-      - ./backend/:/app
+      - ./api_backend/:/app
     # restart: unless-stopped
