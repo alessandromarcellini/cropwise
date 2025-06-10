@@ -12,3 +12,17 @@ services:
     volumes:
       - ./api_backend/:/app
     # restart: unless-stopped
+
+  cropwise-iot-backend:
+    build:
+      context: ./iot_backend
+      dockerfile: Dockerfile
+    container_name: cropwise-iot-backend
+    ports:
+      - "9000:9000"
+    environment:
+      - PYTHONPATH=/app
+      - ENVIRONMENT=development
+    volumes:
+      - ./iot_backend/:/app
+    # restart: unless-stopped
