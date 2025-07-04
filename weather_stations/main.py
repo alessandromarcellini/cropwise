@@ -10,21 +10,33 @@ import json
 
 STATIONS = [
     {
-        "id": 1,
-        "name": "Station A",
+        "id": 0,
+        "name": "Senigallia",
+
+        "latitude": 43.714952,
+        "longitude": 13.217949,
+        
         "token": "secret_tokennnnn",
         "sensors": ["temperature", "humidity"],
     },
     {
-        "id": 2,
-        "name": "Station B",
+        "id": 1,
+        "name": "Jesi",
+
+        "latitude": 43.522783,
+        "longitude": 13.243787,
+
         "token": "0123456789ciaooo",
         "sensors": ["temperature"],
     },
     {
-        "id": 3,
-        "name": "Station C",
-        "token": "invalid_token",
+        "id": 2,
+        "name": "Bologna",
+
+        "latitude": 44.49382,
+        "longitude": 11.342633,
+
+        "token": "tokennnnn_secret",
         "sensors": ["temperature", "humidity"],
     },
 ]
@@ -82,7 +94,8 @@ class WeatherStation:
                 return False
             return True
         
-        
+        time.sleep(5) # wait for the server to start, TODO: will change this in the future implementing health checks to the container
+
         sock = connect_to_server()
         if not sock:
             print(f"Station {self.station_id} could not connect to server after {MAX_N_TRIES} attempts, exiting...")

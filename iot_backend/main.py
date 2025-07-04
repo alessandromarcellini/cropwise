@@ -3,7 +3,41 @@ import threading
 import json
 
 AUTH_TOKEN_LEN = 16  # Length of the authentication token
-token_list = ["secret_tokennnnn", "0123456789ciaooo"]  # List to store authentication tokens
+
+STATIONS = [ #TODO fetch these from the db
+    {
+        "id": 0,
+        "name": "Senigallia",
+
+        "latitude": 43.714952,
+        "longitude": 13.217949,
+        
+        "token": "secret_tokennnnn",
+        "sensors": ["temperature", "humidity"],
+    },
+    {
+        "id": 1,
+        "name": "Jesi",
+
+        "latitude": 43.522783,
+        "longitude": 13.243787,
+
+        "token": "0123456789ciaooo",
+        "sensors": ["temperature"],
+    },
+    {
+        "id": 2,
+        "name": "Bologna",
+
+        "latitude": 44.49382,
+        "longitude": 11.342633,
+
+        "token": "tokennnnn_secret",
+        "sensors": ["temperature", "humidity"],
+    },
+]
+
+
 
 def handle_client(client_socket, client_address):
     """Handle communication with a connected client"""
@@ -15,27 +49,30 @@ def handle_client(client_socket, client_address):
             
         auth_token = data.decode('utf-8').strip()
         print(f"[{threading.current_thread().name}] Received: {auth_token}")
-        if auth_token in token_list:
-            print("Valid token")
-            response = "Token accepted"
-            client_socket.send(response.encode('utf-8'))
-        else:
-            print("Invalid token")
+
+        connecting_station = next((station for station in STATIONS if station["token"] == auth_token), None)
+        if not connecting_station:
+            print("Invalid token (not found in STATIONS)")
             response = "Invalid token"
             client_socket.send(response.encode('utf-8'))
             client_socket.close()
             return
-        threading.current_thread().name = auth_token
+        else:
+            print("Valid token")
+            response = "Token accepted"
+            client_socket.send(response.encode('utf-8'))
+        
+        threading.current_thread().name = connecting_station['name']
+        print(f"[{threading.current_thread().name}] Connection established with {client_address}")
         
         # DATA RECEIVING LOOP
         while True:
-            pass
             # Receive data from client
             msg_len = int(client_socket.recv(4).decode('utf-8').strip())
             metrics = client_socket.recv(msg_len).decode('utf-8').strip()
 
             json_metrics = json.loads(metrics)
-            print(f"Metric saved: {json_metrics}...")
+            print(f"Metric saved: {json_metrics}...") #TODO save this to the db
 
     except ConnectionResetError:
         print(f"[{threading.current_thread().name}] Client {client_address} disconnected unexpectedly")
@@ -55,7 +92,7 @@ class IoTSERVER:
     #running flag
     """
     
-    def __init__(self, host='localhost', port=8080):
+    def __init__(self, host='localhost', port=9000):
         self.host = host
         self.port = port
         self.server_socket = None
@@ -110,7 +147,7 @@ class IoTSERVER:
 
 def main():
     # Create and start server
-    server = IoTSERVER('0.0.0.0', 9000)
+    server = IoTSERVER('localhost', 9000)
     server.start()
 
 if __name__ == "__main__":
