@@ -2,6 +2,10 @@ import socket
 import threading
 import json
 
+from firestore import FirestoreClient
+
+from datetime import datetime
+
 AUTH_TOKEN_LEN = 16  # Length of the authentication token
 
 STATIONS = [ #TODO fetch these from the db
@@ -39,7 +43,7 @@ STATIONS = [ #TODO fetch these from the db
 
 
 
-def handle_client(client_socket, client_address):
+def handle_client(client_socket, client_address, db: FirestoreClient):
     """Handle communication with a connected client"""
     print(f"[{threading.current_thread().name}] New connection from {client_address}")
     
@@ -72,7 +76,20 @@ def handle_client(client_socket, client_address):
             metrics = client_socket.recv(msg_len).decode('utf-8').strip()
 
             json_metrics = json.loads(metrics)
-            print(f"Metric saved: {json_metrics}...") #TODO save this to the db
+            timestamp = datetime.now() # TODO not the best, it should be the station that sends it
+            for metric_type in json_metrics:
+                metric_to_upload = {
+                    "type": metric_type,
+                    "value": json_metrics[metric_type],
+                }
+                metric_to_upload['station_id'] = connecting_station['id']
+                metric_to_upload['timestamp'] = timestamp
+
+                try:
+                    db.upload_item('metrics', item=metric_to_upload)
+                    print(f"Metric saved: {metric_to_upload}...")
+                except Exception as e:
+                    print("Error uploading metrics to the Database")
 
     except ConnectionResetError:
         print(f"[{threading.current_thread().name}] Client {client_address} disconnected unexpectedly")
@@ -92,11 +109,12 @@ class IoTSERVER:
     #running flag
     """
     
-    def __init__(self, host='localhost', port=9000):
+    def __init__(self, host='localhost', port=9000, firestore_client=None):
         self.host = host
         self.port = port
         self.server_socket = None
         self.running = False
+        self.firestore_client = firestore_client
     
     def start(self):
         """Start the TCP server"""
@@ -121,7 +139,7 @@ class IoTSERVER:
                     # Create and start new thread for this client
                     client_thread = threading.Thread(
                         target=handle_client,
-                        args=(client_socket, client_address),
+                        args=(client_socket, client_address, self.firestore_client),
                         name=f"Client-{client_address[0]}:{client_address[1]}"
                     )
                     client_thread.daemon = True  # Thread will die when main program exits
@@ -146,8 +164,11 @@ class IoTSERVER:
         print("Server stopped")
 
 def main():
+    # Connect to Firestore
+    db = FirestoreClient(project_id='cropwise-76105', credentials_path="secrets/firebase_key.json")
+
     # Create and start server
-    server = IoTSERVER('localhost', 9000)
+    server = IoTSERVER('localhost', 9000, firestore_client=db)
     server.start()
 
 if __name__ == "__main__":
