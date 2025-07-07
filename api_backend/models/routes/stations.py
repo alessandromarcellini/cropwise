@@ -19,6 +19,7 @@ class SensorType(str, Enum):
     # TODO add other sensor types
 
 class Sensor(BaseModel):
+    id: int
     state: SensorState = SensorState.active
     sensor_type: SensorType
 

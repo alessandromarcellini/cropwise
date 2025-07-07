@@ -1,6 +1,6 @@
 from datetime import datetime
 from core.PersistanceBase import PersistanceBase
-from models.db.stations import Station, Sensor
+from models.db.stations import Station, Sensor, SensorType
 
 from sqlalchemy import select
 
@@ -14,14 +14,57 @@ class StationRepository(PersistanceBase):
     def get_by_id(self):
         pass
 
+    def get_interval(self):
+        query = (
+            select(Station.interval)
+            .where(Station.id == self.station_id)
+        )
+
+        return self.session.execute(query).scalar_one()
+
     def set_interval(self, interval: int):
         pass
+
+    def get_state(self):
+        query = (
+            select(Station.status)
+            .where(Station.id == self.station_id)
+        )
+
+        return self.session.execute(query).scalar_one()
 
     def set_state(self, state: bool):
         pass
 
     def get_associated_stations(self, farm_field_id: int):
         pass
+
+    def get_sensors(self):
+        query = (
+            select(
+                Sensor.id,
+                Sensor.status.label('state'),
+                SensorType.type_name.label('sensor_type')
+            )
+            .join(SensorType, Sensor.type_id == SensorType.id)
+            .where(Sensor.station_id == self.station_id)
+        )
+
+        return self.session.execute(query).mappings().all()
+    
+    def get_data(self):
+        query = (
+            select(
+                Station.id,
+                Station.name,
+                Station.latitude,
+                Station.longitude,
+                Station.status.label('state'),
+                Station.interval.label('misuration_interval'),
+            )
+            .where(Station.id == self.station_id)
+        )
+        return self.session.execute(query).mappings().one()
 
 class StationsRepository(PersistanceBase):
     def __init__(self):
@@ -72,11 +115,12 @@ class MetricsRepository(PersistanceBase):
         pass
 
 class SensorsRepository(PersistanceBase):
-    def __init__(self):
+    def __init__(self, sensor_id: int):
         super().__init__()
+        self.sensor_id = sensor_id
 
-    def get_by_id(self, sensor_id: int):
+    def get_by_id(self):
         pass
 
-    def set_state(self, sensor_id: int, state: bool):
+    def set_state(self, state: bool):
         pass

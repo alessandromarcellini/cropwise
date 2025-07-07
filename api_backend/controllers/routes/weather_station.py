@@ -1,6 +1,5 @@
 from typing import List
-from controllers.persistance.stations import StationsRepository
-from models.routes.stations import BasicWeatherStation
+from controllers.persistance.stations import StationsRepository, StationRepository
 
 class StationController:
     #station_id: int
@@ -8,21 +7,29 @@ class StationController:
 
     def __init__(self, station_id: int):
         self.station_id = station_id
-        self.persistance_controller = StationsRepository()
+        self.persistance_controller = StationRepository(station_id)
     
     # GETTERS ---------------------------------------------------
     
-    def get_current_state(self): # -> StationState
+    def get_current_state(self) -> bool:
+        return self.persistance_controller.get_state()
+
+    def get_current_interval(self) -> float:
+        return self.persistance_controller.get_interval()
+
+    def get_sensors(self):
+        return self.persistance_controller.get_sensors()
+
+    def get_basic_data(self):
         pass
 
-    def get_current_interval(self): # -> float
-        pass
-
-    def get_sensors(self): # -> List[Sensor]
-        pass
-
-    def get_basic_data(self): # -> StationBasicData
-        pass
+    def get_data(self):
+        data = self.persistance_controller.get_data()
+        sensors = self.persistance_controller.get_sensors()
+        return {
+            **data,
+            'sensors': sensors
+        }
 
     # SETTERS ---------------------------------------------------
     def set_interval(self, interval: float):
@@ -70,4 +77,10 @@ class StationsController:
     def find_stations(self, subname: str):
         return self.persistance_controller.filter_by_subname(subname)
 
-    
+
+def get_station_controller(station_id):
+    controller = StationController(station_id)
+    try:
+        yield controller
+    finally:
+        controller.persistance_controller.close()
