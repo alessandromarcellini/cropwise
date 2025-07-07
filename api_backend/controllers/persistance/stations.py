@@ -1,33 +1,44 @@
 from datetime import datetime
+from core.PersistanceBase import PersistanceBase
+from models.db.stations import Station, Sensor
 
-class StationsRepository:
-    def __init__(self):
-        pass
+from sqlalchemy import select
 
-    def get_by_id(self, station_id: int):
+class StationRepository(PersistanceBase):
+    #station_id : int
+    
+    def __init__(self, station_id: int):
+        super().__init__()
+        self.station_id = station_id
+
+    def get_by_id(self):
         pass
 
     def get_all(self):
         pass
 
-    def filter_by_subname(self, station_subname: str):
+    def set_interval(self, interval: int):
         pass
 
-    def get_starred_stations(self, user_id: int):
+    def set_state(self, state: bool):
         pass
 
     def get_associated_stations(self, farm_field_id: int):
         pass
 
-    def set_interval(self, station_id: int, interval: int):
-        pass
-
-    def set_state(self, station_id: int, state: bool):
-        pass
-
-class MetricsRepository:
+class StationsRepository(PersistanceBase):
     def __init__(self):
-        pass
+        super().__init__()
+
+    def filter_by_subname(self, station_subname: str):
+        result = self.session.execute(
+            select(Station).where(Station.name.ilike(f"{station_subname}%"))
+        )
+        return result.mappings().all()
+
+class MetricsRepository(PersistanceBase):
+    def __init__(self):
+        super().__init__()
 
     def get_by_id(self, metric_id: int):
         pass
@@ -38,9 +49,9 @@ class MetricsRepository:
     def get_in_last_10_minutes(self, station_id: int):
         pass
 
-class SensorsRepository:
+class SensorsRepository(PersistanceBase):
     def __init__(self):
-        pass
+        super().__init__()
 
     def get_by_id(self, sensor_id: int):
         pass

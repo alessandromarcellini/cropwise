@@ -18,6 +18,9 @@ class UsersRepository:
     def deactivate(self, user_id: str):
         pass
 
+    def get_starred_stations(self, user_id: int):
+        pass
+
 class FarmFiledsRepository:
     # TODO the dicts will probably be replaced with SQLAlchemy models
     def __init__(self):

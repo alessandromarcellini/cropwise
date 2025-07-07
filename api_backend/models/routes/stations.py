@@ -1,14 +1,15 @@
 from pydantic import BaseModel
 from pydantic import field_validator
 
-from enum import Enum
+from enum import Enum, Flag
 
-class StationState(bool, Enum):
+class StationState(Flag):
     active = True
     inactive = False
 
-class SensorState(StationState):
-    pass
+class SensorState(Flag):
+    active = True
+    inactive = False
 
 class SensorType(str, Enum):
     humidity = "humidity"

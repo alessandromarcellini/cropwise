@@ -1,9 +1,12 @@
+from controllers.persistance.stations import StationsRepository
 
 class StationController:
     #station_id: int
+    #persistance_controller: StationsRepository
 
     def __init__(self, station_id: int):
         self.station_id = station_id
+        self.persistance_controller = StationsRepository()
     
     # GETTERS ---------------------------------------------------
     
@@ -36,6 +39,7 @@ class StationController:
     def get_associated_farmers(self): # -> List[Farmer]
         pass
 
+
 class UserStationController:
     #station_id: int
 
@@ -54,13 +58,15 @@ class UserStationController:
 
 
 class StationsController:
+    #persistance_controller: StationsRepository
     def __init__(self):
-        pass
+        self.persistance_controller = StationsRepository()
 
     def get_stations(self): # -> List[Station]
         pass
 
     def find_stations(self, subname: str): # -> List[Station]
-        pass
+        return self.persistance_controller.filter_by_subname(subname)
+        
 
     
