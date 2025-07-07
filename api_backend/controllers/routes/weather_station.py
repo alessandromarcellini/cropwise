@@ -1,4 +1,6 @@
+from typing import List
 from controllers.persistance.stations import StationsRepository
+from models.routes.stations import BasicWeatherStation
 
 class StationController:
     #station_id: int
@@ -65,8 +67,7 @@ class StationsController:
     def get_stations(self): # -> List[Station]
         pass
 
-    def find_stations(self, subname: str): # -> List[Station]
+    def find_stations(self, subname: str):
         return self.persistance_controller.filter_by_subname(subname)
-        
 
     

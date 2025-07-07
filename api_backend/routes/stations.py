@@ -1,4 +1,6 @@
+from typing import List
 from fastapi import APIRouter, Request, Depends
+from models.routes.stations import BasicWeatherStation
 
 from controllers.routes.weather_station import StationsController
 
@@ -12,6 +14,6 @@ async def get_stations(request: Request):
     return {"message": "List of stations"}
 
 @router.get("/find")
-async def get_stations(request: Request, subname: str, controller: StationsController = Depends(StationsController)):
-    return controller.find_stations(subname)
-
+async def get_stations(request: Request, subname: str, controller: StationsController = Depends(StationsController)) -> List[BasicWeatherStation]:
+    stations = controller.find_stations(subname)
+    return [BasicWeatherStation(**station) for station in stations]

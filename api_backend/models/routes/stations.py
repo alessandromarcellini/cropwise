@@ -22,13 +22,12 @@ class Sensor(BaseModel):
     state: SensorState = SensorState.active
     sensor_type: SensorType
 
-class WeatherStation(BaseModel):
+class BasicWeatherStation(BaseModel):
+    id: int
     name: str
     latitude: float
     longitude: float
     state: StationState = StationState.active
-    misuration_interval: int = 500 # in milliseconds
-    sensors: list[Sensor]
 
     @field_validator("latitude")
     @classmethod
@@ -43,6 +42,11 @@ class WeatherStation(BaseModel):
         if not (-180 <= value <= 180):
             raise ValueError("Longitude must be between -180 and 180")
         return value
+
+
+class WeatherStation(BasicWeatherStation):
+    misuration_interval: int = 500 # in milliseconds
+    sensors: list[Sensor]
     
     @field_validator("misuration_interval")
     @classmethod

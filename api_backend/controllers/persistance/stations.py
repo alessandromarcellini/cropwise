@@ -31,8 +31,20 @@ class StationsRepository(PersistanceBase):
         super().__init__()
 
     def filter_by_subname(self, station_subname: str):
+        query = (
+            select(
+                Station.id,
+                Station.name,
+                Station.latitude,
+                Station.longitude,
+                Station.status,
+            )
+            .where(
+                Station.name.ilike(f"{station_subname}%")
+            )
+        )
         result = self.session.execute(
-            select(Station).where(Station.name.ilike(f"{station_subname}%"))
+            query
         )
         return result.mappings().all()
 
