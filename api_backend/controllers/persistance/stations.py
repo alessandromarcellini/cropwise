@@ -14,9 +14,6 @@ class StationRepository(PersistanceBase):
     def get_by_id(self):
         pass
 
-    def get_all(self):
-        pass
-
     def set_interval(self, interval: int):
         pass
 
@@ -29,6 +26,19 @@ class StationRepository(PersistanceBase):
 class StationsRepository(PersistanceBase):
     def __init__(self):
         super().__init__()
+    
+    def get_all(self):
+        query = (
+            select(
+                Station.id,
+                Station.name,
+                Station.latitude,
+                Station.longitude,
+                Station.status,
+            )
+        )
+        result =  self.session.execute(query)
+        return result.mappings().all()
 
     def filter_by_subname(self, station_subname: str):
         query = (

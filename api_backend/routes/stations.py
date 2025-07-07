@@ -10,8 +10,9 @@ router = APIRouter(
 )
 
 @router.get("/")
-async def get_stations(request: Request):
-    return {"message": "List of stations"}
+async def get_stations(request: Request, controller: StationsController = Depends(StationsController)) -> List[BasicWeatherStation]:
+    stations = controller.get_stations()
+    return [BasicWeatherStation(**station) for station in stations]
 
 @router.get("/find")
 async def get_stations(request: Request, subname: str, controller: StationsController = Depends(StationsController)) -> List[BasicWeatherStation]:

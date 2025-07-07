@@ -65,7 +65,7 @@ class StationsController:
         self.persistance_controller = StationsRepository()
 
     def get_stations(self): # -> List[Station]
-        pass
+        return self.persistance_controller.get_all()
 
     def find_stations(self, subname: str):
         return self.persistance_controller.filter_by_subname(subname)
