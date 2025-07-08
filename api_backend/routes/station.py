@@ -32,7 +32,6 @@ async def get_sensors(station_id: int, request: Request, controller: StationCont
 async def get_basic_data(station_id: int, request: Request, controller: StationController = Depends(get_station_controller)):
     return {"message": "Station!", "station_id": station_id}
 
-
 @router.get("/{station_id}/numberOfViewingUsers")
 async def get_number_of_viewing_users(station_id: int, request: Request, controller: StationController = Depends(get_station_controller)):
     return {"message": "This will not be implemented right away (probably never)"}

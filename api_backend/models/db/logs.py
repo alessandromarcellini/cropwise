@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import ForeignKey, SmallInteger, String, TIMESTAMP, BigInteger
+from sqlalchemy import ForeignKey, SmallInteger, String, TIMESTAMP, BigInteger, event
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from core.orm import Base
@@ -27,4 +27,22 @@ class OperationType(Base):
     __tablename__ = "operation_types"
 
     id: Mapped[int] = mapped_column(SmallInteger, primary_key=True)
-    name: Mapped[str] = mapped_column(String(20), unique=True)
+    name: Mapped[str] = mapped_column(String(30), unique=True)
+
+@event.listens_for(OperationType.__table__, 'after_create')
+def create_default_cultivation_types(target, connection, **kw):
+    # Insert default Operation Types
+    connection.execute(
+        target.insert().values([
+            {'name': 'login'},
+            {'name': 'registration'},
+            {'name': 'metric_received'},
+            {'name': 'changed_interval'},
+            {'name': 'changed_station_state'},
+            {'name': 'changed_sensor_state'},
+            {'name': 'realtime_data'},
+            {'name': 'past_data'},
+            {'name': 'starred_station'},
+        ])
+    )
+    connection.commit()

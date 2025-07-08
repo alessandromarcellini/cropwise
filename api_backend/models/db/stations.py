@@ -1,5 +1,5 @@
 from typing import List
-from sqlalchemy import ForeignKey, SmallInteger, String
+from sqlalchemy import ForeignKey, SmallInteger, String, event
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from models.db.farm import farmfield_stations_association
@@ -10,7 +10,7 @@ class Station(Base):
     __tablename__ = "stations"
 
     id: Mapped[int] = mapped_column(SmallInteger, primary_key=True)
-    name: Mapped[str] = mapped_column(String(20))
+    name: Mapped[str] = mapped_column(String(30))
     latitude: Mapped[float]
     longitude: Mapped[float]
     status: Mapped[bool]
@@ -39,6 +39,22 @@ class SensorType(Base):
     __tablename__ = "sensor_types"
 
     id: Mapped[int] = mapped_column(SmallInteger, primary_key=True)
-    type_name: Mapped[str] = mapped_column(String(20), unique=True)
+    type_name: Mapped[str] = mapped_column(String(30), unique=True)
 
     sensors: Mapped[List["Sensor"]] = relationship(back_populates="sensor_type")
+
+@event.listens_for(SensorType.__table__, 'after_create')
+def create_default_cultivation_types(target, connection, **kw):
+    # Insert default Operation Types
+    connection.execute(
+        target.insert().values([
+            {'type_name': 'air_humidity'},
+            {'type_name': 'ground_humidity'},
+            {'type_name': 'temperature'},
+            {'type_name': 'precipitation'},
+            {'type_name': 'pressure'},
+            {'type_name': 'clouds_presence'},
+            {'type_name': 'wind'},
+        ])
+    )
+    connection.commit()
