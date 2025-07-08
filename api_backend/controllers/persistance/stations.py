@@ -1,8 +1,10 @@
 from datetime import datetime
 from core.PersistanceBase import PersistanceBase
 from models.db.stations import Station, Sensor, SensorType
+from models.db.users import User
+from models.db.farm import FarmField, farmfield_stations_association
 
-from sqlalchemy import select
+from sqlalchemy import select, update
 
 class StationRepository(PersistanceBase):
     #station_id : int
@@ -22,8 +24,14 @@ class StationRepository(PersistanceBase):
 
         return self.session.execute(query).scalar_one()
 
-    def set_interval(self, interval: int):
-        pass
+    def set_interval(self, new_interval: int):
+        update_query = (
+            update(Station)
+            .where(Station.id == self.station_id)
+            .values(interval=new_interval)
+        )
+        self.session.execute(update_query)
+        self.session.commit()
 
     def get_state(self):
         query = (
@@ -33,8 +41,14 @@ class StationRepository(PersistanceBase):
 
         return self.session.execute(query).scalar_one()
 
-    def set_state(self, state: bool):
-        pass
+    def set_state(self, new_state: bool):
+        update_query = (
+            update(Station)
+            .where(Station.id == self.station_id)
+            .values(status=new_state)
+        )
+        self.session.execute(update_query)
+        self.session.commit()
 
     def get_associated_stations(self, farm_field_id: int):
         pass
@@ -65,6 +79,39 @@ class StationRepository(PersistanceBase):
             .where(Station.id == self.station_id)
         )
         return self.session.execute(query).mappings().one()
+    
+    def get_basic_data(self):
+        query = (
+            select(
+                Station.id,
+                Station.name,
+                Station.latitude,
+                Station.longitude,
+                Station.status.label('state'),
+            )
+            .where(Station.id == self.station_id)
+        )
+        return self.session.execute(query).mappings().one()
+    
+    def get_associated_farmers(self):
+        FARMER_ROLE_ID = 2
+        query = (
+            select(
+                User.id,
+                User.first_name.label('name'),
+                User.last_name.label('surname'),
+                User.email,
+            ).distinct()
+            .select_from(farmfield_stations_association)
+            .join(FarmField, FarmField.id == farmfield_stations_association.c.farm_field_id)
+            .join(User, User.id == FarmField.user_id)
+            .where(
+                farmfield_stations_association.c.station_id == self.station_id,
+                User.role_id == FARMER_ROLE_ID, # shouldn't be necessary but won't hurt
+                User.id == FarmField.user_id
+            )
+        )
+        return self.session.execute(query).mappings().all()
 
 class StationsRepository(PersistanceBase):
     def __init__(self):
@@ -120,7 +167,39 @@ class SensorsRepository(PersistanceBase):
         self.sensor_id = sensor_id
 
     def get_by_id(self):
-        pass
+        query = (
+            select(
+                Sensor.id,
+                Sensor.status.label('state'),
+                SensorType.type_name.label('sensor_type')
+            )
+            .join(SensorType, Sensor.type_id == SensorType.id)
+            .where(Sensor.id == self.sensor_id)
+        )
+        result = self.session.execute(query).mappings().one_or_none()
+        if not result:
+            raise ValueError("Sensor doesn't exist")
+        return result
+            
 
-    def set_state(self, state: bool):
-        pass
+    def set_state(self, station_id: int, new_state: bool):
+        real_station_id_query = (
+            select(
+                Sensor.station_id
+            )
+            .where(
+                Sensor.id == self.sensor_id
+            )
+        )
+
+        real_station_id = self.session.execute(real_station_id_query).scalar()
+        if real_station_id != station_id:
+            raise ValueError("The selected sensor doesn't belong to the selected station.")
+
+        update_query = (
+            update(Sensor)
+            .where(Sensor.id == self.sensor_id)
+            .values(status=new_state)
+        )
+        self.session.execute(update_query)
+        self.session.commit()

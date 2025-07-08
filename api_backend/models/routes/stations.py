@@ -1,27 +1,55 @@
 from pydantic import BaseModel
 from pydantic import field_validator
 
-from enum import Enum, Flag
+from enum import Enum
 
-class StationState(Flag):
-    active = True
-    inactive = False
+class StationState(str, Enum):
+    active = "active"
+    inactive = "inactive"
 
-class SensorState(Flag):
-    active = True
-    inactive = False
+    def to_bool(self) -> bool:
+        return self == StationState.active
+
+class SensorState(str, Enum):
+    active = "active"
+    inactive = "inactive"
+
+    def to_bool(self) -> bool:
+        return self == SensorState.active
+    
+    def to_state(bool_value: bool):
+        if bool_value:
+            return SensorState.active
+        return SensorState.inactive
 
 class SensorType(str, Enum):
-    humidity = "humidity"
+    air_humidity = "air_humidity"
+    ground_humidity = "ground_humidity"
     temperature = "temperature"
     pressure = "pressure"
     precipitation = "precipitation"
+    wind = "wind"
+    cloud_presence = "cloud_presence"
     # TODO add other sensor types
 
 class Sensor(BaseModel):
     id: int
     state: SensorState = SensorState.active
     sensor_type: SensorType
+
+    @field_validator('state', mode='before')
+    @classmethod
+    def validate_state(cls, v):
+        if isinstance(v, bool):
+            return 'active' if v else 'inactive'
+        return v
+    
+    @field_validator('sensor_type', mode='before')
+    @classmethod
+    def validate_sensor_type(cls, v):
+        if hasattr(v, 'value'):
+            return v.value
+        return v
 
 class BasicWeatherStation(BaseModel):
     id: int
@@ -51,7 +79,7 @@ class WeatherStation(BasicWeatherStation):
     
     @field_validator("misuration_interval")
     @classmethod
-    def validate_longitude(cls, value):
+    def validate_misuration_interval(cls, value):
         if not (250 <= value <= 5000):
             raise ValueError("Misuration interval must be between 0.25 and 5 seconds")
         return value
@@ -66,3 +94,15 @@ class WeatherStation(BasicWeatherStation):
 class Metric(BaseModel):
     metric_type: SensorType
     value: float
+
+
+# ------------ POST REQUESTS MODELS --------------------------
+class Interval(BaseModel):
+    value: int
+    
+    @field_validator("value")
+    @classmethod
+    def validate_misuration_interval(cls, value):
+        if not (250 <= value <= 5000):
+            raise ValueError("Misuration interval must be between 0.25 and 5 seconds")
+        return value

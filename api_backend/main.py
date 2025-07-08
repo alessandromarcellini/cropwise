@@ -5,6 +5,8 @@ from core.orm import engine, Base
 
 from models.db import stations, farm, logs, users 
 
+from models.routes.stations import Interval
+
 # Create FastAPI instance
 app = FastAPI(
     title="CropWise",

@@ -5,18 +5,19 @@ from typing import List
 from models.routes.crops import FarmField
 
 class User(BaseModel):
+    id: int
     name: str
     surname: str
     email: EmailStr
     hashed_password: str | None = None
-    is_active: bool = True
+    is_active: bool | None = None
 
-    @field_validator('password')
-    @classmethod
-    def password_length(cls, value):
-        if len(value) < 8:
-            raise ValueError("Password must be at least 8 characters long")
-        return value
+    # @field_validator('password')
+    # @classmethod
+    # def password_length(cls, value):
+    #     if len(value) < 8:
+    #         raise ValueError("Password must be at least 8 characters long")
+    #     return value
 
 class NonAdminUser(User):
     starred_stations: List[str] = []

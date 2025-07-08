@@ -1,5 +1,7 @@
 from typing import List
 from controllers.persistance.stations import StationsRepository, StationRepository
+from controllers.persistance.stations import SensorsRepository
+from models.routes.stations import SensorState as SensorStateRoutesModel
 
 class StationController:
     #station_id: int
@@ -21,7 +23,7 @@ class StationController:
         return self.persistance_controller.get_sensors()
 
     def get_basic_data(self):
-        pass
+        return self.persistance_controller.get_basic_data()
 
     def get_data(self):
         data = self.persistance_controller.get_data()
@@ -32,21 +34,30 @@ class StationController:
         }
 
     # SETTERS ---------------------------------------------------
-    def set_interval(self, interval: float):
-        pass
+    def set_interval(self, new_interval: int):
+        self.persistance_controller.set_interval(new_interval)
 
-    def set_sensor_state(self, sensor_id: int, state: bool):
-        pass
-
-    def set_state(self, state: bool):
-        pass
+    def set_state(self, new_state: bool):
+        self.persistance_controller.set_state(new_state)
 
     def get_number_of_viewing_users(self): # -> int
         # will be implemented using a websocket
         pass
 
-    def get_associated_farmers(self): # -> List[Farmer]
-        pass
+    def get_associated_farmers(self):
+        return self.persistance_controller.get_associated_farmers()
+
+class SensorController:
+    def __init__(self, sensor_id: int):
+        self.sensor_id = sensor_id
+        self.persistance_controller = SensorsRepository(sensor_id)
+    
+    def get_by_id(self):
+        return self.persistance_controller.get_by_id()
+    
+    def set_sensor_state(self, station_id: int, new_state: bool):
+        self.persistance_controller.set_state(station_id, new_state)
+    
 
 
 class UserStationController:
@@ -80,6 +91,13 @@ class StationsController:
 
 def get_station_controller(station_id):
     controller = StationController(station_id)
+    try:
+        yield controller
+    finally:
+        controller.persistance_controller.close()
+
+def get_sensor_controller(sensor_id):
+    controller = SensorController(sensor_id)
     try:
         yield controller
     finally:
