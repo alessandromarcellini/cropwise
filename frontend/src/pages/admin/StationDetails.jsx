@@ -6,6 +6,7 @@ import axios from 'axios';
 import StationState from '../../components/stations/StationState'
 import StationSensors from '../../components/stations/StationSensors'
 import StationInterval from '../../components/stations/StationInterval'
+import UsersViewing from '../../components/stations/UsersViewing'
 
 function StationDetails() {
 
@@ -47,6 +48,10 @@ function StationDetails() {
             <StationSensors />
 
             <StationInterval />
+
+            <UsersViewing />
+
+            <button>View Associtaed Farmers</button>
         </>
     );
 }
