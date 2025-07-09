@@ -1,23 +1,29 @@
+import React from 'react';
 import { useParams } from 'react-router-dom';
 
-function RealTimeData() {
+import useLatestMetrics from '../../hooks/useLatestMetrics';
+
+
+const RealTimeData = () => {
     const { stationId } = useParams();
+    //TODO fetch from the backend the sensor types that the station has. Add them into the list passed to useLatestMetrics
 
-    // Convert to integer and validate
-    const stationIdInt = parseInt(stationId);
+    const { metrics, loading, error } = useLatestMetrics(parseInt(stationId), ['temperature', 'air_humidity', 'precipitation']);
 
-    if (isNaN(stationIdInt)) {
-        return (
-            <div>
-                <h1>Error</h1>
-                <p>Invalid station ID. Please provide a valid integer.</p>
-            </div>
-        );
-    }
+    if (loading) return <p>Loading metrics...</p>;
+    if (error) return <p>Error loading metrics: {error}</p>;
+    if (!metrics || metrics.length === 0) return <p>No metrics available</p>;
 
     return (
-        <h1>RealTimeData of station: {stationIdInt}</h1>
-    )
-}
+        <ul>
+            {metrics.map((metric) => (
+                <li key={metric.id}>
+                    {metric.type}: {metric.value}
+                    {metric.type === 'temperature' ? '°C' : '%'}
+                </li>
+            ))}
+        </ul>
+    );
+};
 
 export default RealTimeData;

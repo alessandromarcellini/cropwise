@@ -8,36 +8,42 @@ import random
 import socket
 import json
 
-STATIONS = [
+STATIONS = [ #TODO fetch these from the db
     {
-        "id": 0,
+        "id": 1,
         "name": "Senigallia",
 
         "latitude": 43.714952,
         "longitude": 13.217949,
         
         "token": "secret_tokennnnn",
-        "sensors": ["temperature", "humidity"],
+        "sensors": ["air_humidity", "temperature", "precipitation"],
+
+        "sampling_time": 2,
     },
     {
-        "id": 1,
+        "id": 2,
         "name": "Jesi",
 
         "latitude": 43.522783,
         "longitude": 13.243787,
 
         "token": "0123456789ciaooo",
-        "sensors": ["temperature"],
+        "sensors": ["air_humidity", "temperature", "precipitation"],
+
+        "sampling_time": 3.5,
     },
     {
-        "id": 2,
+        "id": 3,
         "name": "Bologna",
 
         "latitude": 44.49382,
         "longitude": 11.342633,
 
         "token": "tokennnnn_secret",
-        "sensors": ["temperature", "humidity"],
+        "sensors": ["air_humidity", "temperature", "precipitation"],
+
+        "sampling_time": 1,
     },
 ]
 
@@ -49,10 +55,11 @@ class WeatherStation:
     #id
     #name
     #token
-    def __init__(self, station_id, name, token):
+    def __init__(self, station_id, name, token, sampling_time):
         self.station_id = station_id
         self.name = name
         self.token = token
+        self.sampling_time = sampling_time
 
     def simulation(self):
         """
@@ -107,25 +114,27 @@ class WeatherStation:
 
         while True:
             metrics_to_send = {}
-            for sensor in STATIONS[self.station_id]["sensors"]:
+            for sensor in STATIONS[self.station_id - 1]["sensors"]:
                 if sensor == "temperature":
                     metrics_to_send["temperature"] = random.uniform(-10, 40)
-                elif sensor == "humidity":
-                    metrics_to_send["humidity"] = random.uniform(0, 100)
+                elif sensor == "air_humidity":
+                    metrics_to_send["air_humidity"] = random.uniform(0, 100)
+                elif sensor == "precipitation":
+                    metrics_to_send["precipitation"] = random.uniform(0, 1)
             print("\n\n")
             print(metrics_to_send)
             print("\n\n")
             json_metrics = json.dumps(metrics_to_send).encode('utf-8')
             sock.send(str(len(json_metrics)).encode('utf-8'))
             sock.send(json_metrics)
-            time.sleep(SAMPLING_TIME)
+            time.sleep(self.sampling_time)
 
 
 if __name__ == "__main__":    
     # Create and start a thread for each weather station
     threads = []
     for station in STATIONS:
-        ws = WeatherStation(station["id"], station["name"], station["token"])
+        ws = WeatherStation(station["id"], station["name"], station["token"], station["sampling_time"])
         thread = threading.Thread(target=ws.simulation)
         thread.daemon = True  # Thread will die when main program exits
         thread.start()

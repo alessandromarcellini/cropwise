@@ -10,34 +10,40 @@ AUTH_TOKEN_LEN = 16  # Length of the authentication token
 
 STATIONS = [ #TODO fetch these from the db
     {
-        "id": 0,
+        "id": 1,
         "name": "Senigallia",
 
         "latitude": 43.714952,
         "longitude": 13.217949,
         
         "token": "secret_tokennnnn",
-        "sensors": ["temperature", "humidity"],
+        "sensors": ["air_humidity", "temperature", "precipitation"],
+
+        "sampling_time": 2,
     },
     {
-        "id": 1,
+        "id": 2,
         "name": "Jesi",
 
         "latitude": 43.522783,
         "longitude": 13.243787,
 
         "token": "0123456789ciaooo",
-        "sensors": ["temperature"],
+        "sensors": ["air_humidity", "temperature", "precipitation"],
+
+        "sampling_time": 3.5,
     },
     {
-        "id": 2,
+        "id": 3,
         "name": "Bologna",
 
         "latitude": 44.49382,
         "longitude": 11.342633,
 
         "token": "tokennnnn_secret",
-        "sensors": ["temperature", "humidity"],
+        "sensors": ["air_humidity", "temperature", "precipitation"],
+
+        "sampling_time": 1,
     },
 ]
 
