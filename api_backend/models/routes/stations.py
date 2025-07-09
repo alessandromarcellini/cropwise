@@ -118,4 +118,4 @@ class StatePayload(BaseModel):
     new_state: StationState
 
     def to_bool(self) -> bool:
-        return self.new_state == SensorState.active
+        return self.new_state == StationState.active

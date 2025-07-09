@@ -60,11 +60,11 @@ async def set_state(station_id: int, new_state: StatePayload, request: Request, 
     return {"message": f"Station State Updated Successfully to {new_state.new_state.value}"}
 
 @router.post("/{station_id}/sensor/{sensor_id}/setState")
-async def set_sensor_state(station_id: int, sensor_id: int, new_state: SensorState, request: Request, controller: SensorController = Depends(get_sensor_controller)):
+async def set_sensor_state(station_id: int, sensor_id: int, new_state: StatePayload, request: Request, controller: SensorController = Depends(get_sensor_controller)):
     #TODO forward the call to the iot_backend that will dispatch it to the corresponding station. If success => update the value in the db
     
     controller.set_sensor_state(station_id, new_state.to_bool())
-    return {"message": f"Sensor State Updated Successfully to {new_state.value}"}
+    return {"message": f"Sensor State Updated Successfully to {new_state.new_state.value}"}
 
 @router.get("/{station_id}/sensor/{sensor_id}/")
 async def get_sensor(station_id: int, sensor_id: int, request: Request, controller: SensorController = Depends(get_sensor_controller)):

@@ -23,7 +23,6 @@ function StationState() {
     });
 
     const handleStationStateChange = (value) => {
-        // TODO call the api and wait for it's response, if no errors => setStationState
         axios.post(
             `http://localhost:8000/api/station/${stationIdInt}/setState`,
             {
