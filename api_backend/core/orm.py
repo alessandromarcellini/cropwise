@@ -13,14 +13,14 @@ load_dotenv()
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 # Create SQLAlchemy engine
-engine = create_engine(DATABASE_URL, echo=True)
+engine = create_engine(DATABASE_URL) #, echo=True
 
-inspector = inspect(engine)
+# inspector = inspect(engine)
 
-tables = inspector.get_table_names()
-print("\n\n\n\n")
-print(tables)
-print("\n\n\n\n")
+# tables = inspector.get_table_names()
+# print("\n\n\n\n")
+# print(tables)
+# print("\n\n\n\n")
 
 # Create SessionLocal class
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

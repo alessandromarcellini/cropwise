@@ -1,14 +1,29 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import axios from 'axios';
 
 import useLatestMetrics from '../../hooks/useLatestMetrics';
 
 
 const RealTimeData = () => {
     const { stationId } = useParams();
-    //TODO fetch from the backend the sensor types that the station has. Add them into the list passed to useLatestMetrics
+    const [sensors, setSensors] = useState([]);
 
-    const { metrics, loading, error } = useLatestMetrics(parseInt(stationId), ['temperature', 'air_humidity', 'precipitation']);
+    useEffect(() => {
+        axios.get(`http://localhost:8000/api/station/${parseInt(stationId)}/sensors`)
+            .then(response => {
+                setSensors(response.data);
+            })
+            .catch(err => {
+                console.error('Error fetching sensors:', err);
+            });
+    }, []);
+
+
+
+    const { metrics, loading, error } = useLatestMetrics(parseInt(stationId), sensors.filter(sensor => sensor.state == 'active').map(sensor => sensor.sensor_type));
+
+    let inactive_sensors = sensors.filter(sensor => sensor.state == 'inactive');
 
     if (loading) return <p>Loading metrics...</p>;
     if (error) return <p>Error loading metrics: {error}</p>;
@@ -22,6 +37,10 @@ const RealTimeData = () => {
                     {metric.type === 'temperature' ? '°C' : '%'}
                 </li>
             ))}
+            {inactive_sensors.map((sensor) => (
+                <li>{sensor.sensor_type}: <span style={{ color: 'red' }}>OFF</span></li>
+            )
+            )}
         </ul>
     );
 };

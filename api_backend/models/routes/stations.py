@@ -58,6 +58,13 @@ class BasicWeatherStation(BaseModel):
     longitude: float
     state: StationState = StationState.active
 
+    @field_validator('state', mode='before')
+    @classmethod
+    def validate_state(cls, v):
+        if isinstance(v, bool):
+            return 'active' if v else 'inactive'
+        return v
+
     @field_validator("latitude")
     @classmethod
     def validate_latitude(cls, value):
@@ -106,3 +113,9 @@ class Interval(BaseModel):
         if not (250 <= value <= 5000):
             raise ValueError("Misuration interval must be between 0.25 and 5 seconds")
         return value
+
+class StatePayload(BaseModel):
+    new_state: StationState
+
+    def to_bool(self) -> bool:
+        return self.new_state == SensorState.active

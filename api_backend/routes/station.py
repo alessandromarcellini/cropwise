@@ -3,7 +3,7 @@ from fastapi import APIRouter, Request, Depends, Body
 
 from controllers.routes.weather_station import StationController, SensorController, get_station_controller, get_sensor_controller
 
-from models.routes.stations import Sensor, WeatherStation, BasicWeatherStation, Interval, StationState, SensorState 
+from models.routes.stations import Sensor, WeatherStation, BasicWeatherStation, Interval, SensorState, StatePayload 
 from models.routes.users import User
 
 router = APIRouter(
@@ -53,11 +53,11 @@ async def set_interval(station_id: int, request: Request, new_interval: Interval
     return {"message": f"Interval Updated Successfully to {new_interval.value}"}
 
 @router.post("/{station_id}/setState")
-async def set_state(station_id: int, new_state: StationState, request: Request, controller: StationController = Depends(get_station_controller)):
+async def set_state(station_id: int, new_state: StatePayload, request: Request, controller: StationController = Depends(get_station_controller)):
     #TODO forward the call to the iot_backend that will dispatch it to the corresponding station. If success => update the value in the db
     
     controller.set_state(new_state.to_bool())
-    return {"message": f"Station State Updated Successfully to {new_state.value}"}
+    return {"message": f"Station State Updated Successfully to {new_state.new_state.value}"}
 
 @router.post("/{station_id}/sensor/{sensor_id}/setState")
 async def set_sensor_state(station_id: int, sensor_id: int, new_state: SensorState, request: Request, controller: SensorController = Depends(get_sensor_controller)):
